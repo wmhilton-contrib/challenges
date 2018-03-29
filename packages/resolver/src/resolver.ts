@@ -1,5 +1,6 @@
 import * as Types from './types';
 const get = require('get-value');
+const got = require('got');
 
 export class Resolver implements Types.IResolver {
   public async resolve(source: any, opts?: Types.IResolveOptions): Promise<Types.IResolveResult> {
@@ -41,6 +42,21 @@ export class Resolver implements Types.IResolver {
     // resolve to a depth of 1)
     const links = {};
     for (const pointer of pointers) {
+      // Handle already resolved pointer paths by simply linking.
+      // TODO: ignore relative link paths!
+      if (links[pointer.name]) {
+        pointer.target = links[pointer.name];
+        continue;
+      }
+      // Handle URIs
+      // if (pointer.name.startsWith('http')) {
+      //   pointer.value = await got(pointer.name, {json: true});
+      //   console.log(pointer.value);
+      //   // TODO: handle errors
+      //   links[pointer.name] = pointer.value;
+      //   continue;
+      // }
+      // Handle document absolute paths.
       if (!pointer.name.startsWith('#/')) {
         errors.push({
           code: Types.ErrorCodes.POINTER_MISSING,

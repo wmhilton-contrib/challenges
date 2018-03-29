@@ -30,4 +30,8 @@ An hour into my coffee shop workout, I realize my OH S*** mistake:
     I have to resolve all pointers lazily to take advantage of
     the jsonPointer option that only requires a subset of the graph.
 This doesn't matter now for performance, but when we add in HTTP requests 
-it will. 
+it will.
+
+I take a break from "the hard stuff". Let's uncomment the fixtures,
+add URL fetching, and see how many tests pass without worrying about
+the 'jsonPointer' option.
