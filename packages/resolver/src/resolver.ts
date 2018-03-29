@@ -17,7 +17,7 @@ export class Resolver implements Types.IResolver {
     function walk (parent : any) {
       // For now lets assume the object (not array) case.
       for (const key of Object.keys(parent)) {
-        const value = source[key];
+        const value = parent[key];
         if (typeof value === 'object') {
           if (value.$ref) {
             pointers.push({
