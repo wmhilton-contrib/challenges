@@ -13,3 +13,7 @@ export interface IResolveError {
   code: string;
   message: string;
 }
+
+export const ErrorCodes = {
+  POINTER_MISSING: 'POINTER_MISSING'
+}

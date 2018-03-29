@@ -39,7 +39,7 @@ describe('resolver', () => {
   });
 
   describe('resolve', () => {
-    test.skip('should support jsonPointers', async () => {
+    test('should support jsonPointers', async () => {
       const source = {
         hello: {
           $ref: '#/word',
