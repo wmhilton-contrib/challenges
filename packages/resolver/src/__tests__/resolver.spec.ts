@@ -65,6 +65,22 @@ describe('resolver', () => {
       expect(resolved.result).toEqual(source);
     });
 
+    test('should support pointers to pointers', async () => {
+      const source = {
+        hello: {
+          $ref: '#/word',
+        },
+        word: {
+          $ref: '#/word2',
+        },
+        word2: 'world',
+      };
+
+      const resolver = new Resolver();
+      const resolved = await resolver.resolve(source);
+      expect(resolved.result.hello).toEqual('world');
+    });
+
     test.skip('should support chained jsonPointers + partial resolution', async () => {
       const source = {
         hello: {

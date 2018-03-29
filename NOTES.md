@@ -25,3 +25,9 @@ Got these steps done at coffee shop this morning:
 - JSON.parse(input)
 - build output object
 - collect unresolvable into error messages
+
+An hour into my coffee shop workout, I realize my OH S*** mistake:
+    I have to resolve all pointers lazily to take advantage of
+    the jsonPointer option that only requires a subset of the graph.
+This doesn't matter now for performance, but when we add in HTTP requests 
+it will. 

@@ -2,7 +2,9 @@ export interface IResolver {
   resolve(source: any, opts?: IResolveOptions): Promise<IResolveResult>;
 }
 
-export interface IResolveOptions {}
+export interface IResolveOptions {
+  jsonPointer: string
+}
 
 export interface IResolveResult {
   result: any;

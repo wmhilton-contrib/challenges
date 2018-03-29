@@ -1,19 +1,11 @@
 import * as Types from './types';
 const get = require('get-value');
 
-function iterateOver (object : Object | Array<any>, foreach : Function) {
-  if (Array.isArray(object)) {
-    for (const el of object) {
-      foreach(el)
-    }
-  }
-}
-
 export class Resolver implements Types.IResolver {
   public async resolve(source: any, opts?: Types.IResolveOptions): Promise<Types.IResolveResult> {
     if (opts) {
       console.log(opts);
-    }
+    } 
     // Sanitizing input to make sure it is valid JSON
     const result = JSON.parse(JSON.stringify(source))
     const errors = [];
@@ -45,7 +37,9 @@ export class Resolver implements Types.IResolver {
       walk(unwalked.shift());
     }
 
-    // Resolve pointer values
+    // Resolve pointer values (really we're just linking them, since we only
+    // resolve to a depth of 1)
+    const links = {};
     for (const pointer of pointers) {
       if (!pointer.name.startsWith('#/')) {
         errors.push({
@@ -60,17 +54,32 @@ export class Resolver implements Types.IResolver {
           code: Types.ErrorCodes.POINTER_MISSING,
           message: `'${pointer.name}' does not exist`
         })
+      } else {
+        // remember this value for resolving later
+        links[pointer.name] = pointer.target;
       }
     }
 
     // Assemble output object
-    for (const pointer of pointers) {
+    limit = 10000;
+    const references = pointers.slice(0);
+    while (references.length && limit-- > 0) {
+      const pointer = references.shift();
       if (pointer.target) {
         pointer.parent[pointer.key] = pointer.target;
+        if (typeof pointer.target === 'object' && pointer.target.$ref) {
+          // A pointer to a pointer! Add this to the list of references to resolve later.
+          references.push({
+            name: pointer.target.$ref,
+            parent: pointer.parent,
+            key: pointer.key,
+            target: links[pointer.target.$ref]
+          })
+        }
       }
     }
 
-    console.log(pointers);
+    console.log(references);
     return {
       result,
       errors
