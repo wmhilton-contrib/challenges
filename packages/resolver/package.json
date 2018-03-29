@@ -1,0 +1,20 @@
+{
+  "private": true,
+  "description": "$ref resolver.",
+  "main": "lib/index.js",
+  "module": "lib/index.es.js",
+  "jsnext:main": "lib/index.es.js",
+  "license": "MIT",
+  "scripts": {
+    "prepublishOnly": "yarn build",
+    "prebuild": "yarn clean",
+    "build": "NODE_ENV=production yarn build.module",
+    "build.module": "tsc --outDir ./lib",
+    "start": "NODE_ENV=development yarn build.module -w",
+    "clean": "git clean -fdX .",
+    "lint": "tslint 'src/**/*.ts'"
+  },
+  "dependencies": {
+    "tslib": "1.x.x"
+  }
+}

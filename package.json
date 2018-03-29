@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "description": "Some coding challenges.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "setup": "yarn && yarn clean && yarn bootstrap",
+    "clean": "lerna clean",
+    "bootstrap": "lerna bootstrap",
+    "lint": "lerna exec yarn lint --parallel",
+    "test": "jest",
+    "test.coverage": "yarn test --coverage",
+    "test.watch": "jest --watchAll",
+    "test.update": "jest --updateSnapshot"
+  },
+  "devDependencies": {
+    "@types/jest": "22.2.x",
+    "@types/lodash": "4.14.x",
+    "@types/node": "9.6.x",
+    "enzyme": "3.3.x",
+    "enzyme-to-json": "3.3.x",
+    "jest": "22.4.x",
+    "lerna": "2.9.0",
+    "lodash": "4.x.x",
+    "prettier": "1.11.x",
+    "ts-jest": "22.4.x",
+    "ts-loader": "3.5.x",
+    "tslib": "1.9.x",
+    "tslint": "5.9.x",
+    "tslint-config-prettier": "1.10.x",
+    "tslint-plugin-prettier": "1.3.x",
+    "typescript": "2.7.x"
+  }
+}
