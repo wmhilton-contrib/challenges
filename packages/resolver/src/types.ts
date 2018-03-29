@@ -15,5 +15,6 @@ export interface IResolveError {
 }
 
 export const ErrorCodes = {
-  POINTER_MISSING: 'POINTER_MISSING'
+  POINTER_MISSING: 'POINTER_MISSING',
+  MALFORMED_POINTER: 'MALFORMED_POINTER'
 }

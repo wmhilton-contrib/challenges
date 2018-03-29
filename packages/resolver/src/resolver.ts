@@ -47,9 +47,15 @@ export class Resolver implements Types.IResolver {
 
     // Resolve pointer values
     for (const pointer of pointers) {
-      if (pointer.name.startsWith('#/')) {
-        pointer.target = get(source, pointer.name.replace('#/', ''), {seperator: '/'})
-      } else {
+      if (!pointer.name.startsWith('#/')) {
+        errors.push({
+          code: Types.ErrorCodes.POINTER_MISSING,
+          message: `'${pointer.name}' does not exist`
+        })
+        continue;
+      }
+      pointer.target = get(source, pointer.name.replace('#/', ''), {seperator: '/'})
+      if (pointer.target === undefined) {
         errors.push({
           code: Types.ErrorCodes.POINTER_MISSING,
           message: `'${pointer.name}' does not exist`

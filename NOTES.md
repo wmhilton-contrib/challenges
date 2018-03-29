@@ -15,3 +15,13 @@ Stated strategy:
 - build output object
 
 Let's see how close we stick to that plan...
+
+Got these steps done before bed:
+- walk through object and find all $refs
+- resolve all refs (or given subset) iteratively
+- collect invalid refs into error messages
+
+Got these steps done at coffee shop this morning:
+- JSON.parse(input)
+- build output object
+- collect unresolvable into error messages
