@@ -55,14 +55,14 @@ describe('resolver', () => {
     test.skip('should support not resolving pointers', async () => {
       const source = {
         hello: {
-          $ref: '#/word',
+          $ref: '#/world',
         },
         word: 'world',
       };
 
       const resolver = new Resolver();
       const resolved = await resolver.resolve(source);
-      expect(resolved.result).toBe(source);
+      expect(resolved.result).toEqual(source);
     });
 
     test.skip('should support chained jsonPointers + partial resolution', async () => {
