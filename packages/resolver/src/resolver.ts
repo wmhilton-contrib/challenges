@@ -2,51 +2,55 @@ import * as Types from './types';
 const get = require('get-value');
 const got = require('got');
 
+function isPointer(object: any) {
+  return typeof object === 'object' && object.$ref;
+}
+
 export class Resolver implements Types.IResolver {
   public async resolve(source: any, opts?: Types.IResolveOptions): Promise<Types.IResolveResult> {
     if (opts) {
       console.log(opts);
-    } 
+    }
     // Sanitizing input to make sure it is valid JSON
-    const result = JSON.parse(JSON.stringify(source))
+    const result = JSON.parse(JSON.stringify(source));
     const errors = [];
 
-    const unwalked = [result];
-    const pointers : any[] = [];
+    const pointers: any[] = [];
 
-    function walk (parent : any) {
-      // For now lets assume the object (not array) case.
-      for (const key of Object.keys(parent)) {
-        const value = parent[key];
-        if (typeof value === 'object') {
-          if (value.$ref) {
+    function crawl(parent: Object) {
+      let limit = 100;
+      const unwalked = [parent];
+      function walk(parent: any) {
+        // For now lets assume the object (not array) case.
+        for (const key of Object.keys(parent)) {
+          const value = parent[key];
+          if (isPointer(value)) {
             pointers.push({
               name: value.$ref,
               parent,
               key,
               target: null
-            })
-          } else {
+            });
+          } else if (typeof value === 'object') {
             unwalked.push(value);
           }
         }
       }
+      while (unwalked.length && limit-- > 0) {
+        walk(unwalked.shift());
+      }
     }
-
-    let limit = 100;
-    while (unwalked.length && limit-- > 0) {
-      walk(unwalked.shift());
-    }
+    crawl(result);
 
     // Resolve pointer values (really we're just linking them, since we only
     // resolve to a depth of 1)
     const links = {};
-    for (const pointer of pointers) {
+    function linkPointer(pointer) {
       // Handle already resolved pointer paths by simply linking.
       // TODO: ignore relative link paths!
       if (links[pointer.name]) {
         pointer.target = links[pointer.name];
-        continue;
+        return;
       }
       // Handle URIs
       // if (pointer.name.startsWith('http')) {
@@ -61,41 +65,50 @@ export class Resolver implements Types.IResolver {
         errors.push({
           code: Types.ErrorCodes.POINTER_MISSING,
           message: `'${pointer.name}' does not exist`
-        })
-        continue;
+        });
+        return;
       }
-      pointer.target = get(source, pointer.name.replace('#/', ''), {seperator: '/'})
+      pointer.target = get(source, pointer.name.replace('#/', ''), { seperator: '/' });
       if (pointer.target === undefined) {
         errors.push({
           code: Types.ErrorCodes.POINTER_MISSING,
           message: `'${pointer.name}' does not exist`
-        })
+        });
       } else {
         // remember this value for resolving later
         links[pointer.name] = pointer.target;
       }
     }
 
+    for (const pointer of pointers) {
+      linkPointer(pointer);
+    }
+
     // Assemble output object
-    limit = 10000;
-    const references = pointers.slice(0);
-    while (references.length && limit-- > 0) {
-      const pointer = references.shift();
+    let limit = 10000;
+    while (pointers.length && limit-- > 0) {
+      const pointer = pointers.shift();
       if (pointer.target) {
-        pointer.parent[pointer.key] = pointer.target;
-        if (typeof pointer.target === 'object' && pointer.target.$ref) {
-          // A pointer to a pointer! Add this to the list of references to resolve later.
-          references.push({
-            name: pointer.target.$ref,
-            parent: pointer.parent,
-            key: pointer.key,
-            target: links[pointer.target.$ref]
-          })
+        if (isPointer(pointer.target)) {
+          // Handle pointers to pointers
+          let stack = new Set();
+          let limit = 100;
+          // This stops as soon as a cycle is detected
+          while (isPointer(pointer.target) && !stack.has(pointer.target) && limit--) {
+            console.log(stack);
+            stack.add(pointer.target);
+            console.log(pointer.target);
+            console.log(links);
+            pointer.target = links[pointer.target.$ref];
+          }
+        } else if (typeof pointer.target === 'object') {
+          crawl(pointer.target);
         }
+        // target is now ready to replace pointer object
+        pointer.parent[pointer.key] = pointer.target;
       }
     }
 
-    console.log(references);
     return {
       result,
       errors

@@ -71,6 +71,45 @@ describe('resolver', () => {
           $ref: '#/word',
         },
         word: {
+          $ref: '#/word2',
+        },
+        word2: 'world',
+      };
+
+      const resolver = new Resolver();
+      const resolved = await resolver.resolve(source);
+      expect(resolved.result.hello).toEqual('world');
+    });
+
+    test.skip('should support pointers to uninstantiated nested objects', async () => {
+      const source = {
+        hello: {
+          $ref: '#/foo/bar/baz',
+        },
+        foo: {
+          bar: {
+            $ref: '#/bar',
+          },
+        },
+        bar: {
+          baz: {
+            $ref: '#/baz'
+          },
+        },
+        baz: 'world',
+      };
+
+      const resolver = new Resolver();
+      const resolved = await resolver.resolve(source);
+      expect(resolved.result.hello).toEqual('world');
+    });
+
+    test('should support pointers to objects containing pointers', async () => {
+      const source = {
+        hello: {
+          $ref: '#/word',
+        },
+        word: {
           foo: {
             $ref: '#/word2',
           },
